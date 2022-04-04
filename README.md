@@ -1,5 +1,5 @@
 # async-runtime
-这是一个简单的异步运行时，实现了异步地网络IO读写操作，
+这是一个简单的异步运行时，实现异步地网络IO读写操作，
 是 [async-rust](https://github.com/night-cruise/async-rust) 中 [异步运行时](https://night-cruise.github.io/async-rust/%E5%BC%82%E6%AD%A5%E8%BF%90%E8%A1%8C%E6%97%B6.html)
 章节的源代码。
 
