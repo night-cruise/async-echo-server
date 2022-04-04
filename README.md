@@ -102,7 +102,7 @@ s.send((f"HELLO WORLD[{i}]"*10).encode())
 [src/reactor.rs: 49] (Reactor) delete event: 11
 [src/reactor.rs: 43] (Reactor) wake up. nfd = 5
 ```
-可以看到：`wake up. nfd = 5`，这再次论证了我们的单线程 `echo server` 确实并发地处理多个请求！
+可以看到：`wake up. nfd = 5`，这再次论证了我们的单线程 `echo server` 确实在并发地处理多个请求！
 
 ## LISENCE
 [CCO](https://creativecommons.org/choose/zero/)
