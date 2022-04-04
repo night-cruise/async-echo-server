@@ -1,27 +1,108 @@
-async/await echo server example
-===============================
-async/await echo server + α in rust.
+# async-runtime
+这是一个简单的异步运行时，实现了异步地网络IO读写操作，
+是 [async-rust](https://github.com/night-cruise/async-rust) 中 [异步运行时](https://night-cruise.github.io/async-rust/%E5%BC%82%E6%AD%A5%E8%BF%90%E8%A1%8C%E6%97%B6.html)
+章节的源代码。
 
-- [Echo server](./src/echo.rs): This uses blocking socket I/O and handles only one connection at a time.
-- [Multi-threaded echo server](./src/thread_echo.rs): This is almost same as the blocking one except that it spawn a thread for a each connection to handle multiple connections.
-- [Epoll echo server](./src/epoll_echo.rs) : This uses epoll to handle multiple connections in one thread.
-- [Async/await echo server](./src/aa_echo.rs) : Epoll echo server using async/await syntax. I use the same strategy as the [async-book](https://rust-lang.github.io/async-book/02_execution/03_wakeups.html) to spawn and execute futures. There is a dedicated thread to perform `epoll_wait()`, which is the same as the [async-std](https://github.com/async-rs/async-std/blob/master/src/net/driver/mod.rs).
+## Usage
+克隆：
+```
+git clone https://github.com/night-cruise/async-runtime.git
+```
+切换到项目目录：
+```
+cd async-runtime
+```
+运行例子：
+```
+cargo run --example echo_server
+```
+开启运行后的 `echo server` 会监听地址：`127.0.0.1:8080`
 
-Linux only. Just for learning purposes.
+## client
+使用 `Python` 写一个小脚本模拟 `TCP` 客户端：
+```python
+import socket
+import threading
 
-## Architecture
-The below figure shows the sequence of accept in async/await echo server.
+HOST = '127.0.0.1'
+PORT = 8080
 
-![The sequence of accept](./fig/accept.png)
 
-## How to test
-1. Run a server
-    - e.g., `cargo run --bin aa_echo`
-2. Connect to the server in other terminal
-    - e.g., `nc 127.0.0.1 8080` and then type something
+def send_request():
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((HOST, PORT))
+    for i in range(1, 1025):
+        s.send(f"HELLO WORLD[{i}]".encode())
+        data = s.recv(1024).decode()
+        print(f"RECEIVE DATA: '{data}' in THREAD[{threading.currentThread().name}]")
+    s.close()
 
-## References
-- [async-book](https://rust-lang.github.io/async-book)
 
-## License
-[CC0](https://creativecommons.org/choose/zero/)
+def main():
+    t_lst = []
+    for _ in range(10):
+        t = threading.Thread(target=send_request)
+        t_lst.append(t)
+        t.start()
+
+    for t in t_lst:
+        t.join()
+
+
+if __name__ == '__main__':
+    main()
+```
+运行脚本，服务端会输出以下内容：
+```
+.....
+.....
+.....
+[src/reactor.rs: 43] (Reactor) wake up. nfd = 2
+[src/reactor.rs: 49] (Reactor) delete event: 102
+[src/reactor.rs: 27] (Reactor) add event: 76
+[src/reactor.rs: 49] (Reactor) delete event: 101
+[src/reactor.rs: 43] (Reactor) wake up. nfd = 1
+[src/reactor.rs: 49] (Reactor) delete event: 82
+[src/reactor.rs: 27] (Reactor) add event: 98
+[src/async_io.rs:176] (TcpStream)  close : 104
+[src/async_io.rs:176] (TcpStream)  close : 80
+```
+客户端的输出内容如下所示：
+```
+.....
+.....
+.....
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-68]
+RECEIVE DATA: 'HELLO WORLD[1023]' in THREAD[Thread-90]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-89]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-92]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-96]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-95]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-94]
+RECEIVE DATA: 'HELLO WORLD[1024]' in THREAD[Thread-90]
+```
+可以看出，我们的 `echo server` 正确地返回了响应，`wake up. nfd = 2` 表示有两个事件同时就绪，这说明 `server` 确实在并发地处理多个请求。
+但是为什么 `wake up. nfd` 的值基本都是1或2呢？这是因为客户端只发送 `HELLO WORLD`，数据太小了，即使开了10个线程同时发送，服务端也感受不到“压力”。
+
+如果我们修改代码，每次发送10倍的数据量：
+```python
+s.send((f"HELLO WORLD[{i}]"*10).encode())
+```
+此时，再运行服务端和客户端，我们能够观察到服务端输出：
+```
+.....
+.....
+.....
+[src/reactor.rs: 49] (Reactor) delete event: 10
+[src/reactor.rs: 43] (Reactor) wake up. nfd = 4
+[src/reactor.rs: 27] (Reactor) add event: 7
+[src/reactor.rs: 49] (Reactor) delete event: 12
+[src/reactor.rs: 49] (Reactor) delete event: 8
+[src/reactor.rs: 49] (Reactor) delete event: 13
+[src/reactor.rs: 49] (Reactor) delete event: 11
+[src/reactor.rs: 43] (Reactor) wake up. nfd = 5
+```
+可以看到：`wake up. nfd = 5`，这再次论证了我们的单线程 `echo server` 确实并发地处理多个请求！
+
+## LISENCE
+[CCO](https://creativecommons.org/choose/zero/)

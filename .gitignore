@@ -1,3 +1,2 @@
-/target
-**/*.rs.bk
-*.sw[op]
+/.idea/
+/target/
