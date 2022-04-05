@@ -1,11 +1,5 @@
 # async-runtime
-<<<<<<< HEAD
-这是一个简单的单线程异步运行时，实现了异步的网络IO读写操作，
-=======
-这是一个简单的异步运行时，实现异步地网络IO读写操作，
->>>>>>> eb558d21f161ef5ed462e9c38a23e7104f4cc149
-是 [async-rust](https://github.com/night-cruise/async-rust) 中 [异步运行时](https://night-cruise.github.io/async-rust/%E5%BC%82%E6%AD%A5%E8%BF%90%E8%A1%8C%E6%97%B6.html)
-章节的源代码。
+这是一个简单的单线程异步运行时，实现了异步的网络IO读写操作，是 [async-rust](https://github.com/night-cruise/async-rust) 中 [异步运行时](https://night-cruise.github.io/async-rust/%E5%BC%82%E6%AD%A5%E8%BF%90%E8%A1%8C%E6%97%B6.html) 章节的源代码。
 
 ## Usage
 克隆：
@@ -85,11 +79,7 @@ RECEIVE DATA: 'HELLO WORLD[1008]' in THREAD[Thread-10]
 RECEIVE DATA: 'HELLO WORLD[1014]' in THREAD[Thread-6]
 RECEIVE DATA: 'HELLO WORLD[1016]' in THREAD[Thread-7]
 ```
-<<<<<<< HEAD
 可以看出，我们的 `echo server` 正确地返回了响应，`wake up. nfd = 3` 表示有3个事件同时就绪，这说明 `server` 确实在并发地处理多个请求！
-=======
-可以看到：`wake up. nfd = 5`，这再次论证了我们的单线程 `echo server` 确实在并发地处理多个请求！
->>>>>>> eb558d21f161ef5ed462e9c38a23e7104f4cc149
 
 ## LISENCE
 [CCO](https://creativecommons.org/choose/zero/)
