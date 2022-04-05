@@ -9,7 +9,7 @@ def send_request():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((HOST, PORT))
     for i in range(1, 1025):
-        s.send((f"HELLO WORLD[{i}]"*10).encode())
+        s.send(f"HELLO WORLD[{i}]".encode())
         data = s.recv(1024).decode()
         print(f"RECEIVE DATA: '{data}' in THREAD[{threading.currentThread().name}]")
     s.close()
