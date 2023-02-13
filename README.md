@@ -85,9 +85,3 @@ RECEIVE DATA: 'HELLO WORLD[1014]' in THREAD[Thread-6]
 RECEIVE DATA: 'HELLO WORLD[1016]' in THREAD[Thread-7]
 ```
 可以看出，我们的 `echo server` 正确地返回了响应，`wake up. nfd = 3` 表示有3个事件同时就绪，这说明 `server` 确实在并发地处理多个请求！
-
-
-
-## LISENCE
-
-[CCO](https://creativecommons.org/choose/zero/)
